@@ -1,65 +1,38 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+const synonyms = require('synonyms');
+const cors = require('cors');
+
 const app = express();
-require('dotenv').config()
-//
-//app.use(express.static('dist'))
-//npm run start
+const port = 8000;
 
-app.get('/' , (req, res)=>{
-    res.send("hello Sushma")
+// Middleware
+app.use(bodyParser.json());
+app.use(cors());
 
-})
+// List of stop words
+const stopWords = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', 'should', 'now'];
 
-app.get('/api/jokes' , function(req, res){
-    const jokes = [
-        {
-            "id": 1,
-            "title": "Atoms Joke",
-            "content": "Why don’t scientists trust atoms? Because they make up everything!"
-        },
-        {
-            "id": 2,
-            "title": "Scarecrow Joke",
-            "content": "Why did the scarecrow win an award? Because he was outstanding in his field!"
-        },
-        {
-            "id": 3,
-            "title": "Skeletons Joke",
-            "content": "Why don’t skeletons fight each other? They don’t have the guts."
-        },
-        {
-            "id": 4,
-            "title": "Spaghetti Joke",
-            "content": "What do you call fake spaghetti? An impasta!"
-        },
-        {
-            "id": 5,
-            "title": "Snowman and Vampire Joke",
-            "content": "What do you get when you cross a snowman and a vampire? Frostbite."
-        },
-        {
-            "id": 6,
-            "title": "Bicycle Joke",
-            "content": "Why did the bicycle fall over? Because it was two-tired!"
-        },
-        {
-            "id": 7,
-            "title": "Elsa Balloon Joke",
-            "content": "Why can’t you give Elsa a balloon? Because she will let it go."
-        },
-    ]
+// API route to handle the text spinning
+app.post('/api/spin', (req, res) => {
+    const inputText = req.body.text;
+    const words = inputText.split(' ');
+    const spunWords = words.map(word => {
+        if (stopWords.includes(word.toLowerCase()) || word.length <= 3) {
+            return word;
+        }
+        const synonymList = synonyms(word);
+        if (synonymList) {
+            const randomIndex = Math.floor(Math.random() * synonymList.length);
+            return synonymList[randomIndex];
+        }
+        return word;
+    });
 
-    res.status(200).send({msg:"read Funny jokes" , jokes})
-})
+    const spunText = spunWords.join(' ');
+    res.json({ original: inputText, spun: spunText });
+});
 
-
-
-app.get('/twitter' ,(req , res) =>{
-    res.send("hiiiiiiiiiiiii")
-})
-
-app.listen(process.env.PORT , () =>{
-    console.log(`My Backend App running  on ${process.env.PORT}`)
-})
-
-console.log("Sushma Landge")
+app.listen(port, () => {
+    console.log(`Text spinner app listening at http://localhost:${port}`);
+});

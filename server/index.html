@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Spinner</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .spinner-container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result-container {
+            margin-top: 10px;
+        }
+        .result-container p {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .btn-custom {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner-container">
+        <h1 class="text-center">Text Spinner</h1>
+        <form id="spinForm">
+            <div class="form-group">
+                <label for="textInput">Enter Text</label>
+                <textarea id="textInput" class="form-control" rows="10"></textarea>
+            </div>
+            <button type="submit" class="btn btn-custom btn-block">Submit</button>
+        </form>
+        <div class="result-container">
+            <h2>Results</h2>
+            <p>Original: <span id="originalText"></span></p>
+            <p>Spun: <span id="spunText"></span></p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('spinForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const textInput = document.getElementById('textInput').value;
+
+            const response = await fetch('http://localhost:8000/api/spin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: textInput }),
+            });
+
+            const data = await response.json();
+            document.getElementById('originalText').innerText = data.original;
+            document.getElementById('spunText').innerText = data.spun;
+        });
+    </script>
+</body>
+</html>
